@@ -146,9 +146,7 @@ def Pseduo_Peaks1(DisC, Dist, DC_Mean, DC_Std, data, fitness, StdF, gamma, Var):
         
         # Check whether all of samples has been assigned a pseduo cluster label
         if np.sum(co) >= (len(F)):
-            
             break
-        
         i=i+1 # Expand the size of the pseduo cluster set by 1
 
     C_Indices = Close_FCluster(PeakIndices,DisC,np.shape(DisC)[0])
@@ -157,7 +155,6 @@ def Pseduo_Peaks2(DisC, Dist, DC_Mean, DC_Std, data, fitness, StdF, gamma):
     
     # The temporal sample space in terms of mean and standard deviation
     sample = np.vstack((DC_Mean,DC_Std)).T
-    # Spread= np.max(Dist)
 
     # Search Stage of Pseduo Clusters at the temporal sample space
 #    NeiRad = 0.25 * StdF
@@ -171,23 +168,18 @@ def Pseduo_Peaks2(DisC, Dist, DC_Mean, DC_Std, data, fitness, StdF, gamma):
     co = []
     F = fitness
     while True:
-        
         PeakIndices.append(np.argmax(F))
         Pfitness.append(np.max(F))
-    
         indices = NeighborSearch2(DisC, data, sample, PeakIndices[i], marked, NeiRad)
-        
         C_Indices[indices] = PeakIndices[i]
         if len(indices) == 0:
             indices=[PeakIndices[i]]
-        
         co.append(len(indices)) # Number of samples belong to the current 
-    # identified pseduo cluster
+        # identified pseduo cluster
         marked = np.concatenate(([marked,indices]))
   
         # Fitness Proportionate Sharing
         F = Sharing(F, indices) 
-        
         # Check whether all of samples has been assigned a pseduo cluster label
         if np.sum(co) >= (len(F)):
             break
@@ -360,29 +352,17 @@ def PseduoGeneration(PseP,N):
     return Data
 
 def Psefitness_cal( PseP, sample, data, PseduoData, StdF, gamma):
-    
     OriFN = np.shape(sample)[0]
     PN = np.shape(PseP)[0]
     PsePF = np.zeros(PN)
-    
-    
     for i in range(PN):
-        
         TempSum = 0
-        
         for j in range(OriFN):
-            
             Var1 = np.var(data[:,j])
             Var2 = np.var(PseduoData[:,i])
-            
-            
-            
             P = np.corrcoef(data[:,j],PseduoData[:,i])[0,1]
-            
             Sim = Var1 + Var2 - ((Var1 + Var2)**2 - 4 * Var1 * Var2 * (1 - P**2))**0.5
-            
             D_KL = Sim / (Var1 + Var2)
-            
             TempSum = TempSum + (math.exp(-(D_KL**2)/StdF))**gamma
         PsePF[i] = TempSum
     return PsePF
@@ -432,11 +412,6 @@ def ContinousFeatures(data,label,f_cont):
         if len(tempf_cluster1) > 1:
             temp_fea1 = data[:,tempf_cluster1]
             f_rel1 = mutual_info_classif(temp_fea1,label)
-#               f_rel = []
-#               for j in range(len(tempf_cluster)):
-#                   temp_fea = data[:,tempf_cluster[j]]
-#                   temp_fea = temp_fea.reshape(N,1)
-#                   f_rel.append(mutual_info_classif(temp_fea,label))
             SF1.append(tempf_cluster1[np.argmax(f_rel1)])
         else:
             SF1.append(i)
@@ -477,11 +452,6 @@ def DiscreteFeatures(data,label,f_disc):
         if len(tempf_cluster2) > 1:
             temp_fea2 = data[:,tempf_cluster2]
             f_rel2 = mutual_info_classif(temp_fea2,label)
-#               f_rel = []
-#               for j in range(len(tempf_cluster)):
-#                   temp_fea = data[:,tempf_cluster[j]]
-#                   temp_fea = temp_fea.reshape(N,1)
-#                   f_rel.append(mutual_info_classif(temp_fea,label))
             SF2.append(tempf_cluster2[np.argmax(f_rel2)])
         else:
             SF2.append(i)
@@ -517,7 +487,6 @@ if __name__ == '__main__':
         else:
             SF = SF2
         
-            
         true_label = label.reshape(N,)
                 
         clf1 = KNeighborsClassifier(n_neighbors=3)
