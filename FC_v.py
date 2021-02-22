@@ -61,13 +61,10 @@ def Feature_Dist1(DC_means,DC_std,data,Var,dim,Corr):
     DisC = np.zeros((dim,dim))
     Dist = []
     for i in range(dim):
-        
         for j in range(i,dim):
-            
             DisC[i,j] = KLD_Cal(data,i,j,Var,Corr)
             DisC[j,i] = DisC[i,j]
             Dist.append(DisC[i,j])
-    
     return DisC,Dist
 
 def Feature_Dist2(data,dim):
