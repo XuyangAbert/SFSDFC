@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan  7 22:11:01 2019
-
-@author: xyan
-"""
-
 import numpy as np
 import math
 import pandas as pd
@@ -81,16 +74,11 @@ def Feature_Dist2(data,dim):
     Dist = []
     DisC = np.zeros((dim,dim))
     
-    for i in range(dim):
-        
+    for i in range(dim): 
         for j in range(i,dim):
-            
-#            DisC[i,j] = KLD_Cal(data,i,j,Var,Corr)
             DisC[i,j] = Sym_Cal(data,i,j)
             DisC[j,i] = DisC[i,j]
             Dist.append(DisC[i,j])
-            
-    
     return DisC,Dist
 
 def KLD_Cal(data,i,j,Var,Corr):
@@ -130,7 +118,6 @@ def Pseduo_Peaks1(DisC, Dist, DC_Mean, DC_Std, data, fitness, StdF, gamma, Var):
     
     # The temporal sample space in terms of mean and standard deviation
     sample = np.vstack((DC_Mean,DC_Std)).T
-    # Spread= np.max(Dist)
 
     # Search Stage of Pseduo Clusters at the temporal sample space
     NeiRad = 0.01*max(Dist) #0.01
@@ -206,9 +193,7 @@ def Pseduo_Peaks2(DisC, Dist, DC_Mean, DC_Std, data, fitness, StdF, gamma):
         
         # Check whether all of samples has been assigned a pseduo cluster label
         if np.sum(co) >= (len(F)):
-            
             break
-        
         i=i+1 # Expand the size of the pseduo cluster set by 1
     C_Indices = Close_FCluster(PeakIndices, DisC, np.shape(DisC)[0])
     return PeakIndices,Pfitness,C_Indices
