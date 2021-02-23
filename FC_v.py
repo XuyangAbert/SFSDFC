@@ -10,8 +10,9 @@ from sklearn.metrics import f1_score
 import time
 from sklearn.model_selection import KFold
 from entropy_estimators import *
+import multiprocessing as mp
 
-start = time.time()
+
 def Input():
     # Read the data from the txt file
     sample = pd.read_csv('Test.csv',header=None)
@@ -375,6 +376,7 @@ def Close_FCluster(FCluster,DisC,dim):
     return F_Indices 
 
 def ContinousFeatures(data,label,f_cont):
+    [N, dim] = np.shape(data)
     if len(f_cont) < 1:
         return []
     if len(f_cont) == 1:
@@ -418,6 +420,7 @@ def ContinousFeatures(data,label,f_cont):
     return f_cont[SF1]
 
 def DiscreteFeatures(data,label,f_disc):
+    [N, dim] = np.shape(data)
     if len(f_disc) < 1:
         return []
     disct_sample = data[:,f_disc]
@@ -457,7 +460,38 @@ def DiscreteFeatures(data,label,f_disc):
             SF2.append(i)
     return f_disc[SF2]
 #--------------------------------------------------------------------------------------------------------------  
+
+def calculate_accuracy(data, test_x, label, test_y, f_cont, f_disc):
+    [N, dim] = np.shape(data)
+    SF1 = ContinousFeatures(data,label,f_cont)
+    SF2 = DiscreteFeatures(data,label,f_disc)
+    
+    if len(SF2) > 0 and len(SF1) > 0:
+        SF = np.concatenate([SF1,SF2])
+    elif len(SF1) > 0:
+        SF = SF1
+    else:
+        SF = SF2
+    
+    true_label = label.reshape(N,)
+            
+    clf1 = KNeighborsClassifier(n_neighbors=3)
+    clf2 = KNeighborsClassifier(n_neighbors=3)
+        
+    clf1 = clf1.fit(data[:,SF],true_label)
+    clf2 = clf2.fit(data,true_label)
+    acc1 = clf1.score(test_x[:,SF],test_y)
+    acc2 = clf2.score(test_x,test_y)
+    return (acc1, acc2, len(SF))
+
+def aggregate_accuracy(acc):
+    global Acc1, Acc2, selected_feature
+    Acc1.append(acc[0]) 
+    Acc2.append(acc[1])
+    selected_feature = acc[2]
+
 if __name__ == '__main__':
+    start = time.time()
     [data1,label1] = Input()  
     
     f_cont, f_disc = FeatureType(data1)
@@ -469,40 +503,29 @@ if __name__ == '__main__':
     X = data1
     Acc1 = []
     Acc2 = []
+    selected_feature = 0
     
+    pool = mp.Pool(mp.cpu_count())
+
     for train_index, test_index in kf.split(X):
         data, test_x = X[train_index], X[test_index]
         label, test_y = label1[train_index], label1[test_index]
     
-        [N, dim] = np.shape(data)
+        
         # f_cont = np.arange(0,dim)
         
-        SF1 = ContinousFeatures(data,label,f_cont)
-        SF2 = DiscreteFeatures(data,label,f_disc)
+        pool.apply_async(calculate_accuracy, 
+                         args=(data, test_x, label, test_y, f_cont, f_disc), 
+                         callback=aggregate_accuracy)
         
-        if len(SF2) > 0 and len(SF1) > 0:
-            SF = np.concatenate([SF1,SF2])
-        elif len(SF1) > 0:
-            SF = SF1
-        else:
-            SF = SF2
         
-        true_label = label.reshape(N,)
-                
-        clf1 = KNeighborsClassifier(n_neighbors=3)
-        clf2 = KNeighborsClassifier(n_neighbors=3)
-            
-        clf1 = clf1.fit(data[:,SF],true_label)
-        clf2 = clf2.fit(data,true_label)
-            
-        Acc1.append(clf1.score(test_x[:,SF],test_y)) 
-        Acc2.append(clf2.score(test_x,test_y))
-        
+    pool.close()
+    pool.join()
     
     print("Cross-validated accuracy 1: ", np.mean(Acc1))
     print("Cross-validated accuracy 2: ", np.mean(Acc2))
 
-    print("Number of Selected Features: ", len(SF))
+    print("Number of Selected Features: ", selected_feature)
     end = time.time()
     print('The total time in seconds:',end-start)
     
