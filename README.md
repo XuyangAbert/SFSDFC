@@ -33,4 +33,8 @@ More updates will be added gradually to wrap up the code into a python package s
 
 For any use or modification of this project, please refer to the following article:
 
-X Yan, M Sarkar, B Gebru, S Nazmi, and A Homaifar. A supervised feature selection method for mixed-type data using density-based feature clustering. 2021 IEEE International Conference on Systems, Man, and Cybernetics (SMC2021). (Accepted)
+X Yan, M Sarkar, B Gebru, S Nazmi, and A Homaifar. A supervised feature selection method for mixed-type data using density-based feature clustering. 2021 IEEE International Conference on Systems, Man, and Cybernetics (SMC2021). 
+
+For the continuation of this work, users can refer to the following paper:
+
+Yan, X., Homaifar, A., Sarkar, M., Lartey, B., & Gupta, K. D. (2022). An Online Unsupervised Streaming Features Selection Through Dynamic Feature Clustering. IEEE Transactions on Artificial Intelligence.
